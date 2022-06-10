@@ -80,7 +80,7 @@ public class DemoResource {
     @Path("pokemon")
     public Response pokemon() {
         return Response.ok()
-                .entity(GSON.toJson(getFromAPI()))
+                .entity(GSON.toJson(getNoUrl("https://pokeapi.co/api/v2/pokemon?limit=10&offset=0")))
                 .build();
     }
 
@@ -89,41 +89,19 @@ public class DemoResource {
     @Path("swapi")
     public Response swapi() {
         return Response.ok()
-                .entity(GSON.toJson(getFromAPI2()))
+                .entity(GSON.toJson(getNoUrl("https://swapi.dev/api/people/1")))
                 .build();
     }
 
-    public JsonObject getFromAPI() {
+    private JsonObject getNoUrl(String sentUrl) {
         try {
-            URL url = new URL("https://pokeapi.co/api/v2/pokemon?limit=10&offset=0");//your url i.e fetch data from .
+            URL url = new URL(sentUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            System.out.println("conn");
+            System.out.println(conn);
             conn.setRequestMethod("GET");
             conn.setRequestProperty("User-Agent", "server");
             conn.setRequestProperty("Accept", "application/json;charset=UTF-8");
-            if (conn.getResponseCode() != 200) {
-                throw new RuntimeException("Failed : HTTP Error code : "
-                        + conn.getResponseCode());
-            }
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(in);
-            String output = br.readLine();
-            JsonObject convertedObject = new Gson().fromJson(output, JsonObject.class);
-            conn.disconnect();
-            return convertedObject;
-
-        } catch (Exception e) {
-            System.out.println("Exception in NetClientGet:- " + e);
-            JsonObject error = new Gson().fromJson(new Gson().toJson(e), JsonObject.class);
-            return error;
-        }
-    }
-
-    public JsonObject getFromAPI2() {
-        try {
-            URL url = new URL("https://swapi.dev/api/people/1");//your url i.e fetch data from .
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
             if (conn.getResponseCode() != 200) {
                 throw new RuntimeException("Failed : HTTP Error code : "
                         + conn.getResponseCode());
