@@ -1,18 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package facades;
 
-import dtos.RenameMeDTO;
-import entities.RenameMe;
+import entities.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import entities.Role;
-import entities.User;
 import utils.EMF_Creator;
 
 /**
@@ -23,7 +15,35 @@ public class Populator {
     public static void populate(){
         EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        ManySide ms = new ManySide("first many side");
+        ManySide ms2 = new ManySide("second many side");
+        ManySide ms3 = new ManySide("third many side");
+        OtherManySide oms = new OtherManySide("first other many side");
+        OtherManySide oms2 = new OtherManySide("second other many side");
+        OtherManySide oms3 = new OtherManySide("third other many side");
+        OneSide os = new OneSide("one side");
 
+        ms.setOneSide(os);
+        ms2.setOneSide(os);
+        ms3.setOneSide(os);
+
+        ms.addToOtherManySides(oms);
+        ms.addToOtherManySides(oms2);
+        ms2.addToOtherManySides(oms2);
+        ms2.addToOtherManySides(oms3);
+        ms3.addToOtherManySides(oms3);
+        ms3.addToOtherManySides(oms);
+
+        em.persist(ms);
+        em.persist(ms2);
+        em.persist(ms3);
+        em.getTransaction().commit();
+    }
+
+    public static void populateUsers(){
+        EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
+        EntityManager em = emf.createEntityManager();
         User user = new User("user", "test123");
         User admin = new User("admin", "test123");
         User both = new User("user_admin", "test123");
@@ -34,23 +54,27 @@ public class Populator {
         em.getTransaction().begin();
         Role userRole = new Role("user");
         Role adminRole = new Role("admin");
+
         user.addRole(userRole);
         admin.addRole(adminRole);
         both.addRole(userRole);
         both.addRole(adminRole);
+
         em.persist(userRole);
         em.persist(adminRole);
         em.persist(user);
         em.persist(admin);
         em.persist(both);
+
         em.getTransaction().commit();
         System.out.println("PW: " + user.getUserPass());
         System.out.println("Testing user with OK password: " + user.verifyPassword("test"));
         System.out.println("Testing user with wrong password: " + user.verifyPassword("test1"));
         System.out.println("Created TEST Users");
     }
-    
+
     public static void main(String[] args) {
         populate();
+        populateUsers();
     }
 }
